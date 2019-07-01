@@ -1,5 +1,6 @@
-zeroThreash=0.005
+startThreash=0.01
+endThreash=0.005
 zeroLength=0.01
 minSampleLength=0.2
 preDelay=0.1
-postDelay=1
+postDelay=0.25
