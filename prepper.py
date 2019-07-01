@@ -70,9 +70,7 @@ else:
             fs, data = wave.read(file)
             zeroLengthSamples = round(float(settingsDict['zeroLength']) * fs)
             
-            waveMax = max( np.iinfo(left.dtype).max, -np.iinfo(left.dtype).min)
-            
-            zeroThreashWindow = round(float(settingsDict['zeroThreash']) * waveMax)
+
             
             preDelaySamples = int(float(settingsDict['preDelay']) * fs)
             postDelaySamples = int(float(settingsDict['postDelay']) * fs)
@@ -85,6 +83,10 @@ else:
             
             monoEnvelopeSmooth = np.convolve(monoRectified, np.ones((zeroLengthSamples,)) / zeroLengthSamples, mode = 'full')
             monoEnvelopeSmooth = monoEnvelopeSmooth.astype('int')
+            
+            waveMax = max( np.iinfo(left.dtype).max, -np.iinfo(left.dtype).min)
+            zeroThreashWindow = round(float(settingsDict['zeroThreash']) * waveMax)
+            
             
             clips = [] 
             currentclip = [0, 0]
@@ -109,9 +111,9 @@ else:
             plt.figure(figsize=(10,10))
             plt.plot(monoRectified)
             plt.plot(monoEnvelopeSmooth)
-            plt.plot([0, monoRectified.size], [zeroThreashWave, zeroThreashWave], c = 'red')
-            plt.scatter(np.array(clips)[:,0], zeroThreashWave * np.ones(len(clips)), c = 'black', s = 2)
-            plt.scatter(np.array(clips)[:,1], zeroThreashWave * np.ones(len(clips)), c = 'grey', s = 2)
+            plt.plot([0, monoRectified.size], [zeroThreashWindow, zeroThreashWindow], c = 'red')
+            plt.scatter(np.array(clips)[:,0], zeroThreashWindow * np.ones(len(clips)), c = 'black', s = 2)
+            plt.scatter(np.array(clips)[:,1], zeroThreashWindow * np.ones(len(clips)), c = 'grey', s = 2)
             plt.savefig(file +'.jpg', dpi = 500)
             
             clipno = 1
