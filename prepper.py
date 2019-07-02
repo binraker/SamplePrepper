@@ -26,7 +26,7 @@ def pitch(freq):
     
     octave = h // 12
     n = h % 12
-    return name[n] + str(octave) + ' + ' + str(rem) + ' cents'
+    return name[n] + str(octave),  str(rem) + ' cents'
 
 if '__file__' in locals():
     #print('running from file')
@@ -36,7 +36,7 @@ if '__file__' in locals():
 
 else:
     #print('running in IDE')
-    os.chdir('C:/users/peter/Google Drive/sampler prep')
+    os.chdir('C:/Users/User/Documents/GitHub/SamplePrepper')
 
 
 files = os.listdir(os.getcwd())
@@ -122,13 +122,21 @@ else:
             if 'output' not in files:
                 os.mkdir('output')
             os.chdir('output')
+            
+            notes = {}
+            
             for clip in clips:
                 clipData = data[clip[0]:clip[1]]
-                spec = abs(fft.rfft(clipData[:,0]))
+                spec = (abs(fft.rfft(clipData[:,0])) + abs(fft.rfft(clipData[:,1]))) / 2
                 bins = fft.rfftfreq(clipData[:,0].shape[0], 1 / fs)
                 freq = float(bins[spec.argmax()])
+                note, cents = pitch(freq)
                 if freq > 0:
-                    clipFilename = str(clipno) + ' ' + file[0:-4] + ' ' + pitch(freq) + '.wav'
+                    if note in notes:
+                        notes[note] += 1
+                    else:
+                        notes[note] = 0
+                    clipFilename = str(clipno) + ' ' + file[0:-4] + ' ' + note + ' ' + str(notes[note]) + ' + ' + cents + '.wav'
                     clipno += 1
                     wave.write(clipFilename, fs, clipData)
             os.chdir('..')
