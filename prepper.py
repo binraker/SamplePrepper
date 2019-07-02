@@ -139,7 +139,7 @@ else:
                     else:
                         notes[note] = 0
                     volume = int((float(max(clipData.max(), -clipData.min())) / waveMax) * 127)
-                    clipFilename = str(clipno) + ' ' + file[0:-4] + ' ' + note + cents + ' ' + str(volume)+ ' ' + str(notes[note]) + '.wav'
+                    clipFilename = str(clipno) + ' ' + file[0:-4] + ' ' + note + ' ' + cents + ' ' + str(volume)+ ' ' + str(notes[note]) + '.wav'
                     clipno += 1
                     wave.write(clipFilename, fs, clipData)
             os.chdir('..')
