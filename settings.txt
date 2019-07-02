@@ -1,3 +1,4 @@
+# outputs data as <clip number> <filename> <note> <cents> <volume> <round robin>
 startThreash=0.01
 endThreash=0.005
 zeroLength=0.01

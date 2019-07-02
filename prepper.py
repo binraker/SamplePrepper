@@ -12,7 +12,8 @@ settingsDict={
 'zeroLength': '0.01',
 'minSampleLength': '0.2',
 'preDelay': '0.1',
-'postDelay': '0.25'}
+'postDelay': '0.25',
+}
 
 A4 = 440
 C0 = A4*pow(2, -4.75)
@@ -26,7 +27,7 @@ def pitch(freq):
     
     octave = h // 12
     n = h % 12
-    return name[n] + str(octave),  str(rem) + ' cents'
+    return name[n] + str(octave),  str(rem)
 
 if '__file__' in locals():
     #print('running from file')
@@ -44,6 +45,7 @@ files = os.listdir(os.getcwd())
 if not os.path.isfile('settings.txt'):
    
     f = open('settings.txt','w+')
+    f.write('# outputs data as <clip number> <filename> <note> <cents> <volume> <round robin>\n')
     for setting in settingsDict:
         f.write(setting + '=' + settingsDict[setting] +'\n')
     f.close()
@@ -136,7 +138,8 @@ else:
                         notes[note] += 1
                     else:
                         notes[note] = 0
-                    clipFilename = str(clipno) + ' ' + file[0:-4] + ' ' + note + ' ' + str(notes[note]) + ' + ' + cents + '.wav'
+                    volume = int((float(max(clipData.max(), -clipData.min())) / waveMax) * 127)
+                    clipFilename = str(clipno) + ' ' + file[0:-4] + ' ' + note + cents + ' ' + str(volume)+ ' ' + str(notes[note]) + '.wav'
                     clipno += 1
                     wave.write(clipFilename, fs, clipData)
             os.chdir('..')
