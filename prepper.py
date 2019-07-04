@@ -13,6 +13,7 @@ settingsDict={
 'minSampleLength': '0.2',
 'preDelay': '0.1',
 'postDelay': '0.25',
+'retune' : 'true'
 }
 
 A4 = 440
@@ -27,7 +28,28 @@ def pitch(freq):
     
     octave = h // 12
     n = h % 12
-    return name[n] + str(octave),  str(rem)
+    
+    basefreq = C0 * pow(2, h / 12 )   
+    return name[n] + str(octave),  str(rem), basefreq
+    
+    
+    
+    
+def getFreq(clipData, fs):
+    spec = (abs(fft.rfft(clipData[:,0])) + abs(fft.rfft(clipData[:,1]))) / 2
+    bins = fft.rfftfreq(clipData[:,0].shape[0], 1 / fs)
+    return float(bins[spec.argmax()])
+
+
+
+
+    
+    
+    
+    
+    
+    
+    
 
 if '__file__' in locals():
     #print('running from file')
@@ -72,7 +94,7 @@ else:
     for file in files:
         if file.endswith('.wav'):
             
-            #print (file)
+            print (file)
             fs, data = wave.read(file)
             zeroLengthSamples = round(float(settingsDict['zeroLength']) * fs)
             
@@ -109,7 +131,6 @@ else:
                      if length > minSampleLengthSamples:
                         clips.append(currentclip) 
                         currentclip = [0, 0]                        
-            print (clips)
             
             plt.figure(figsize=(10,10))
             plt.plot(monoRectified)
@@ -127,19 +148,35 @@ else:
             
             notes = {}
             
+            print ('clips found: ' + str(len(clips)))
+            
             for clip in clips:
                 clipData = data[clip[0]:clip[1]]
-                spec = (abs(fft.rfft(clipData[:,0])) + abs(fft.rfft(clipData[:,1]))) / 2
-                bins = fft.rfftfreq(clipData[:,0].shape[0], 1 / fs)
-                freq = float(bins[spec.argmax()])
-                note, cents = pitch(freq)
+                freq = getFreq(clipData, fs)
+               # spec = (abs(fft.rfft(clipData[:,0])) + abs(fft.rfft(clipData[:,1]))) / 2
+               # bins = fft.rfftfreq(clipData[:,0].shape[0], 1 / fs)
+               # freq = float(bins[spec.argmax()])
+                note, cents, base = pitch(freq)
                 if freq > 0:
                     if note in notes:
                         notes[note] += 1
                     else:
                         notes[note] = 0
+                    
+                    if settingsDict['retune'].lower() == 'true':
+                        retuneAmount = freq / base
+                        originalLength = clipData.shape [0]
+                        retunedlength = int(originalLength * retuneAmount)
+                        leftData = clipData[:, 0]
+                        rightData = clipData[:, 1]
+                        retuned = np.empty([retunedlength, 2])
+                        retuned[:, 0] = np.interp(np.arange(retunedlength)/(retunedlength/originalLength),np.arange(originalLength), leftData)
+                        retuned[:, 1] = np.interp(np.arange(retunedlength)/(retunedlength/originalLength),np.arange(originalLength), rightData)
+                        clipData = retuned
+                    
                     volume = int((float(max(clipData.max(), -clipData.min())) / waveMax) * 127)
                     clipFilename = str(clipno) + ' ' + file[0:-4] + ' ' + note + ' ' + cents + ' ' + str(volume)+ ' ' + str(notes[note]) + '.wav'
+                    print ('saving: ' + clipFilename)
                     clipno += 1
                     wave.write(clipFilename, fs, clipData)
             os.chdir('..')
