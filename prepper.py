@@ -173,7 +173,8 @@ else:
                         retuned[:, 0] = np.interp(np.arange(retunedlength)/(retunedlength/originalLength),np.arange(originalLength), leftData)
                         retuned[:, 1] = np.interp(np.arange(retunedlength)/(retunedlength/originalLength),np.arange(originalLength), rightData)
                         clipData = retuned
-                    
+                    freq = getFreq(clipData, fs)    
+                    note, cents, base = pitch(freq)
                     volume = int((float(max(clipData.max(), -clipData.min())) / waveMax) * 127)
                     clipFilename = str(clipno) + ' ' + file[0:-4] + ' ' + note + ' ' + cents + ' ' + str(volume)+ ' ' + str(notes[note]) + '.wav'
                     print ('saving: ' + clipFilename)
